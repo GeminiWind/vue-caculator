@@ -1,7 +1,7 @@
 <template>
     <div id="app">
             <div class="container-displayContext">
-                <el-row>
+                <el-row style="text-align: right; font-size: 4em">
                     <el-col :span="24">
                         <div class="grid-content bg-purple-dark displayContext">
                             {{displayContext || 0}}
@@ -10,7 +10,7 @@
                 </el-row>
             </div>
             <div class="caculator-context">
-                <el-row :gutter="5">
+                <el-row :gutter="15">
                     <el-col :span="6">
                         <el-button plain @click="handleInput('add')">+</el-button>
                     </el-col>
@@ -24,7 +24,7 @@
                         <el-button plain @click="handleInput('divide')">/</el-button>
                     </el-col>
                 </el-row>
-                <el-row :gutter="5">
+                <el-row :gutter="15">
                     <el-col :span="6">
                         <el-button plain @click="handleInput('7')">7</el-button>
                     </el-col>
@@ -35,10 +35,10 @@
                          <el-button plain @click="handleInput('9')">9</el-button>
                     </el-col>
                     <el-col :span="6">
-                            <el-button plain @click="handleInput('AC')">AC</el-button>
+                            <el-button style="background-color: #f4a064" plain @click="handleInput('AC')">AC</el-button>
                     </el-col>
                 </el-row>
-                <el-row :gutter="5">
+                <el-row :gutter="15">
                     <el-col :span="6">
                         <el-button plain @click="handleInput('4')">4</el-button>
                     </el-col>
@@ -48,11 +48,8 @@
                     <el-col :span="6">
                          <el-button plain @click="handleInput('6')">6</el-button>
                     </el-col>
-                    <el-col :span="6">
-                            <el-button plain @click="handleInput('need')">need</el-button>
-                    </el-col>
                 </el-row>
-                <el-row :gutter="5">
+                <el-row :gutter="15">
                     <el-col :span="6">
                         <el-button plain @click="handleInput('1')">1</el-button>
                     </el-col>
@@ -62,11 +59,8 @@
                     <el-col :span="6">
                          <el-button plain @click="handleInput('3')">3</el-button>
                     </el-col>
-                    <el-col :span="6">
-                            <el-button plain @click="handleInput('need')">need</el-button>
-                    </el-col>
                 </el-row>
-                <el-row :gutter="5">
+                <el-row :gutter="15">
                     <el-col :span="6">
                         <el-button plain @click="handleInput('0')">0</el-button>
                     </el-col>
@@ -90,8 +84,8 @@ export default {
       secondNumber: undefined,
       operator: undefined,
       result: undefined,
-      inputValue: undefined,
-      displayContext: 0,
+      tmpVal: undefined,
+      displayContext: undefined,
     };
   },
   methods: {
@@ -136,12 +130,7 @@ export default {
 
       switch (character) {
         case "AC":
-          this.firstNumber = undefined;
-          this.secondNumber = undefined;
-          this.operator = undefined;
-          this.result = undefined;
-          this.inputValue = undefined;
-          this.displayContext = undefined;
+          this.resetContext();
           break;
 
         case "=":
@@ -157,49 +146,70 @@ export default {
           break;
 
         default:
+          // if the last result is available
           if (this.result) {
+            // and user input a operator
+            // then assign last result to first number
+            // and continue to caculated
             if (isOperator(character)) {
                 this.firstNumber = this.result;
                 this.secondNumber = undefined;
                 this.operator = undefined;
                 this.result = undefined;
-                this.inputValue = undefined;
-                this.displayContext = undefined;
+                this.tmpVal = undefined;
+                this.setDisplayContext(this.firstNumber);
             } else {
-                this.firstNumber = undefined;
-                this.secondNumber = undefined;
-                this.operator = undefined;
-                this.result = undefined;
-                this.inputValue = undefined;
-                this.displayContext = undefined;
+              // if new number is inputted
+              // reset caculator context
+              // then start new caculation
+                this.resetContext();
             }
           }
+
           if (!this.operator && !this.secondNumber) {
+            // set value for firstNumber
             if (!isOperator(character)) {
-              this.inputValue = this.inputValue
-                ? this.inputValue.concat(character)
-                : character;
-              this.firstNumber = this.parseInputToNumber(this.inputValue);
+              this.firstNumber = this.getInputNumber(character);
               this.setDisplayContext(this.firstNumber);
               console.log("first number", this.firstNumber);
             } else {
+              // set value for operator
               this.operator = character;
-              this.inputValue = undefined;
+              this.tmpVal = undefined;
               console.log("operator", this.operator);
             }
           } else {
-            console.log(character);
-            this.inputValue = this.inputValue
-              ? this.inputValue.concat(character)
-              : character;
-            this.secondNumber = this.parseInputToNumber(this.inputValue);
+            // set value for secondNumber
+            this.secondNumber = this.getInputNumber(character);
             console.log("second number", this.secondNumber);
-             this.setDisplayContext(this.secondNumber);
+            this.setDisplayContext(this.secondNumber);
           }
       }
     },
     setDisplayContext(displayContext) {
         this.displayContext = displayContext
+    },
+    resetContext() {
+      this.firstNumber = undefined;
+      this.secondNumber = undefined;
+      this.operator = undefined;
+      this.result = undefined;
+      this.tmpVal = undefined;
+      this.displayContext = undefined;
+    },
+    // use tmp variable to store input number
+    getInputNumber(character) {
+      if (this.tmpVal) {
+        if (!(this.tmpVal.includes('.') && character === '.')) {
+            this.tmpVal = this.tmpVal.concat(character)
+        }
+      } else {
+        this.tmpVal = character;
+      }
+
+      const outputNumber = this.parseInputToNumber(this.tmpVal);
+
+      return outputNumber;
     }
   }
 };
@@ -215,24 +225,17 @@ export default {
   .el-col {
     border-radius: 4px;
   }
+  .el-button {
+    width: 100%;
+  }
   .bg-purple-dark {
     background: #99a9bf;
   }
-  .bg-purple {
-    background: #d3dce6;
-  }
   .btn-red-light {
-    background-color:#e04204;
-  }
-  .bg-purple-light {
-    background: #e5e9f2;
+    background-color:#e86f19;
   }
   .grid-content {
     border-radius: 4px;
     min-height: 36px;
-  }
-  .row-bg {
-    padding: 10px 0;
-    background-color: #f9fafc;
   }
 </style>
