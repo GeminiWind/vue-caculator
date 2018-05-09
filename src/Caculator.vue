@@ -48,6 +48,9 @@
                     <el-col :span="6">
                          <el-button plain @click="handleInput('6')">6</el-button>
                     </el-col>
+                    <el-col :span="6">
+                         <el-button plain style="background-color: #f4a064" @click="handleInput('DEL')">DEL</el-button>
+                    </el-col>
                 </el-row>
                 <el-row :gutter="15">
                     <el-col :span="6">
@@ -201,10 +204,11 @@ export default {
     getInputNumber(character) {
       if (this.tmpVal) {
         if (!(this.tmpVal.includes('.') && character === '.')) {
-            this.tmpVal = this.tmpVal.concat(character)
+         this.tmpVal =
+            this.tmpVal = (character === 'DEL') ? this.tmpVal.substring(0, this.tmpVal.length - 1) : this.tmpVal.concat(character);
         }
       } else {
-        this.tmpVal = character;
+        this.tmpVal = (character !== 'DEL') ? character : undefined;
       }
 
       const outputNumber = this.parseInputToNumber(this.tmpVal);
