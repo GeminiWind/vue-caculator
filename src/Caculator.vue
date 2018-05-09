@@ -131,6 +131,13 @@ export default {
       const isOperator = inputString =>
         ["add", "substract", "multiple", "divide"].includes(inputString);
 
+      const operatorMap = {
+        add: "+",
+        substract: "-",
+        multiple: "x",
+        divide: "/"
+      };
+
       switch (character) {
         case "AC":
           this.resetContext();
@@ -175,10 +182,10 @@ export default {
               this.firstNumber = this.getInputNumber(character);
               this.setDisplayContext(this.firstNumber);
               console.log("first number", this.firstNumber);
-            } else {
-              // set value for operator
+            } else if (this.firstNumber) {
               this.operator = character;
               this.tmpVal = undefined;
+              this.setDisplayContext(operatorMap[this.operator]);
               console.log("operator", this.operator);
             }
           } else {
